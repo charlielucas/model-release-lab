@@ -1,0 +1,16 @@
+[project]
+name = "document-labeling-eval-demo"
+version = "0.1.0"
+description = "Synthetic document labeling and evaluation workflow"
+requires-python = ">=3.9"
+dependencies = []
+
+[project.scripts]
+document-labeling-eval = "document_labeling_eval.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
