@@ -50,10 +50,3 @@ This is a small version of a document labeling workflow. A larger version could 
 - The label set is small.
 - The report is text-based by design.
 
-## Safety Notes
-
-- no real documents
-- no employer data
-- no customer records
-- no credentials or API keys
-- no private work code
