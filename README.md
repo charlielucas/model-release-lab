@@ -1,52 +1,102 @@
-# Document Labeling Evaluation
+# Model Release Lab
 
-A small Python project for labeling short synthetic documents and checking the results against expected labels.
+Model Release Lab is a small, full-stack workbench for deciding whether a text
+classifier is ready to replace the current model. It compares a transparent
+rules champion with a TF-IDF and logistic-regression candidate, then applies
+release policy separately from model scoring.
 
-The data is synthetic. It is not employer data, customer data, medical data, or legal data.
+The project uses only synthetic records. It accepts no uploads, makes no remote
+model calls, and contains no employer or customer data.
 
-## What It Does
+## Why I built it
 
-The workflow reads short document snippets, assigns a topic and risk label, and writes an evaluation report.
+A model can improve overall while getting worse on an important slice. It can
+also create an unsustainable review queue, emit unexpected labels, or need a
+documented exception after the metrics are complete. Those are release
+problems, not just model-training problems.
 
-It is meant to show a practical pattern used around LLM and NLP work:
+This project turns that workflow into something you can inspect:
 
-- define an expected label set
-- label documents in a repeatable way
-- keep predicted and expected labels side by side
-- report accuracy by field
-- list misses for review
+- champion and candidate metrics on the same benchmark
+- separate topic and risk-label accuracy
+- protected Security-segment checks
+- controlled-label and review-workload gates
+- record-level review reasons
+- required explanations for overrides, rejections, and rollbacks
+- reproducible model, benchmark, policy, and evaluation fingerprints
 
-There are no API calls in this repo. The labeler is deliberately transparent so the evaluation flow is easy to inspect.
+## Guided scenarios
 
-## Quick Start
+| Scenario | What it proves | Expected result |
+| --- | --- | --- |
+| Clean release | The candidate clears every configured gate | PASS |
+| Critical slice regression | Aggregate results cannot hide a Security regression | BLOCK |
+| Unknown label | Outputs outside the controlled taxonomy stop the release | BLOCK |
+| Review workload surge | Confidence drift cannot silently overwhelm reviewers | BLOCK |
+| Override and rollback | Human decisions are bounded and recorded after evaluation | BLOCK, then reviewer action |
 
-Use Python 3.9 or newer.
+Each failure is an explicit, versioned fixture. The interface labels synthetic
+injections instead of presenting them as organic model behavior.
+
+The review queue is benchmark analysis, so it can route known candidate misses
+as well as low-confidence outputs. It is not a claim about live production
+review volume, and the displayed probability is not separately calibrated.
+
+## Stack
+
+- Python 3.11, scikit-learn, FastAPI, SQLite
+- React 19, TypeScript, Vite
+- pytest, Ruff, Vitest
+- Docker and GitHub Actions
+
+The evaluation engine is independent of HTTP and persistence. FastAPI handles
+validated requests, SQLite stores complete run evidence, and the React client
+shows the same API used by the tests. See [the architecture notes](docs/ARCHITECTURE.md)
+and [testing strategy](docs/TESTING.md) for the boundaries and tradeoffs.
+
+## Run locally
+
+Install [uv](https://docs.astral.sh/uv/) and Node.js 22, then run:
 
 ```bash
-PYTHONPATH=src python3 -m document_labeling_eval label
-PYTHONPATH=src python3 -m document_labeling_eval evaluate
+make install
+make check
 ```
 
-Or use the Makefile:
+Start the API and UI in separate terminals:
 
 ```bash
-make test
-make demo
+make dev-api
+make dev-ui
 ```
 
-## Outputs
+Open `http://localhost:5173`. You can also run one scenario without the web UI:
 
-- `examples/labeled_documents.csv`
-- `examples/evaluation_report.md`
+```bash
+uv run model-release-lab clean-release
+```
 
-## Design Notes
+## Run the container
 
-This is a small version of a document labeling workflow. A larger version could swap in embeddings or an LLM, but the evaluation shape would stay similar: define labels, capture predictions, compare results, and inspect errors.
+```bash
+docker build -t model-release-lab .
+docker run --rm -p 8000:8000 model-release-lab
+```
 
-## Known Limits
+Open `http://localhost:8000`. The container compiles the frontend and serves it
+from the same FastAPI process.
 
-- The documents are synthetic.
-- The labeler is keyword based.
-- The label set is small.
-- The report is text-based by design.
+## Deploy
 
+The included `render.yaml` defines one free Docker web service with `/health` as
+its health check. Render sets the public port at runtime, so the same image also
+runs locally on port 8000. Run history uses the service's ephemeral filesystem
+and can reset when a free instance sleeps, restarts, or redeploys.
+
+## Boundaries
+
+This is an educational release workflow, not a production model registry. The
+benchmark is deliberately small, SQLite is appropriate only for a single demo
+process, and reviewer identity is not authenticated. A production version would
+need durable object storage, signed model and dataset versions, reviewer roles,
+background jobs, migrations, and production monitoring.

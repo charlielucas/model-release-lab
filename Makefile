@@ -1,14 +1,29 @@
-PYTHON ?= python3
+.PHONY: install check test lint build dev-api dev-ui demo
 
-.PHONY: test demo label evaluate
+install:
+	uv sync --extra dev
+	cd frontend && npm ci
+
+check: lint test build
 
 test:
-	PYTHONPATH=src $(PYTHON) -m unittest discover -s tests
+	uv run pytest
+	cd frontend && npm test
 
-label:
-	PYTHONPATH=src $(PYTHON) -m document_labeling_eval label
+lint:
+	uv run ruff check .
+	uv run ruff format --check .
+	cd frontend && npm run typecheck
 
-evaluate:
-	PYTHONPATH=src $(PYTHON) -m document_labeling_eval evaluate
+build:
+	uv build
+	cd frontend && npm run build
 
-demo: label evaluate
+dev-api:
+	uv run uvicorn model_release_lab.api:app --reload
+
+dev-ui:
+	cd frontend && npm run dev
+
+demo:
+	uv run model-release-lab clean-release

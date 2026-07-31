@@ -1,16 +1,38 @@
 [project]
-name = "document-labeling-eval-demo"
+name = "model-release-lab"
 version = "0.1.0"
-description = "Synthetic document labeling and evaluation workflow"
-requires-python = ">=3.9"
-dependencies = []
+description = "Synthetic model evaluation, review, and release-gating workbench"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.116,<1",
+  "scikit-learn>=1.7,<2",
+  "uvicorn[standard]>=0.35,<1",
+]
+
+[project.optional-dependencies]
+dev = [
+  "httpx>=0.28,<1",
+  "pip-audit>=2.9,<3",
+  "pytest>=9.0.3,<10",
+  "ruff>=0.12,<1",
+]
 
 [project.scripts]
-document-labeling-eval = "document_labeling_eval.cli:main"
+model-release-lab = "model_release_lab.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools>=80"]
 build-backend = "setuptools.build_meta"
