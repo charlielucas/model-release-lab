@@ -1,5 +1,7 @@
 # Model Release Lab
 
+[Try the live demo](https://model-release-lab.onrender.com/)
+
 Model Release Lab is a small, full-stack workbench for deciding whether a text
 classifier is ready to replace the current model. It compares a transparent
 rules champion with a TF-IDF and logistic-regression candidate, then applies
@@ -92,6 +94,9 @@ The included `render.yaml` defines one free Docker web service with `/health` as
 its health check. Render sets the public port at runtime, so the same image also
 runs locally on port 8000. Run history uses the service's ephemeral filesystem
 and can reset when a free instance sleeps, restarts, or redeploys.
+
+The public demo runs on Render's free tier, so the first request after a period
+of inactivity can take about a minute.
 
 ## Boundaries
 
